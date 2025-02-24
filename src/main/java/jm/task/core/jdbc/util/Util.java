@@ -25,7 +25,7 @@ public class Util {
             return connection;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Не удалось установить соединение с базой данных", e);
+            throw new RuntimeException(e.getMessage());
         }
     }
     // реализуйте настройку соединения с БД
