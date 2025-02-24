@@ -13,27 +13,13 @@ import org.hibernate.service.ServiceRegistry;
 
 
 public class Util {
-    /*private static SessionFactory sessionFactory;
 
-    static {
-        try {
-            sessionFactory = new Configuration()
-                    .configure("hibernate.cfg.xml")
-                    .buildSessionFactory();
-        } catch (Throwable ex) {
-            throw new ExceptionInInitializerError(ex);
-        }
-    }
-    public static SessionFactory getConnection() {
-        return sessionFactory;
-    }*/
     private static SessionFactory sessionFactory;
     public static SessionFactory getConnection() {
         if (sessionFactory == null) {
             try {
                 Configuration configuration = new Configuration();
 
-                // Hibernate settings equivalent to hibernate.cfg.xml's properties
                 Properties settings = new Properties();
                 settings.put(Environment.DRIVER, "com.mysql.cj.jdbc.Driver");
                 settings.put(Environment.URL, "jdbc:mysql://localhost:3306/mydbtest?useSSL=false");
