@@ -3,10 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +21,7 @@ public class UserDaoJDBCImpl implements UserDao {
                              "age TINYINT)")) {
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to create table", e);
+            throw new RuntimeException(e.getMessage());
         }
 
     }
@@ -35,21 +32,32 @@ public class UserDaoJDBCImpl implements UserDao {
              PreparedStatement ps = connection.prepareStatement("DROP TABLE IF EXISTS users")) {
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to drop table", e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
         try (Connection connection = Util.getConnection();
              PreparedStatement ps = connection.prepareStatement(
-                     "INSERT INTO users (name, last_name, age) VALUES (?, ?, ?)")) {
+                     "INSERT INTO users (name, last_name, age) VALUES (?, ?, ?)",
+                     Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, name);
             ps.setString(2, lastName);
             ps.setByte(3, age);
             ps.executeUpdate();
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    long id = generatedKeys.getLong(1);
+                    User user = new User(name, lastName, age);
+                    user.setId(id);
+                } else {
+                    throw new SQLException("Failed to insert row into the table");
+                }
+            }
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to save user", e);
+            throw new RuntimeException(e.getMessage());
         }
+
     }
 
     public void removeUserById(long id) {
@@ -60,7 +68,7 @@ public class UserDaoJDBCImpl implements UserDao {
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to remove user", e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -75,11 +83,14 @@ public class UserDaoJDBCImpl implements UserDao {
                 String name = rs.getString("name");
                 String lastName = rs.getString("last_name");
                 byte age = rs.getByte("age");
-                users.add(new User(name, lastName, age));
+                User user = new User(name, lastName, age);
+                user.setId(id);
+                users.add(user);
+
             }
             return users;
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get users", e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -88,7 +99,7 @@ public class UserDaoJDBCImpl implements UserDao {
              PreparedStatement ps = connection.prepareStatement("DELETE FROM users")) {
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to clean table", e);
+            throw new RuntimeException(e.getMessage());
         }
 
     }
