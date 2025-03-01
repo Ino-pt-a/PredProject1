@@ -24,7 +24,7 @@ this.sessionFactory = Util.getSessionFactory();
             transaction = session.beginTransaction();
             session.createSQLQuery(
                     "CREATE TABLE IF NOT EXISTS users (" +
-                            "id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
+                            "user_id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
                             "name VARCHAR(45), " +
                             "last_name VARCHAR(45), " +
                             "age TINYINT)"
